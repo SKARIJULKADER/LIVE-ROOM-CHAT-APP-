@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0e1a" />
+  <title>Live Room — a conversation that is alive</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body data-tier="calm" data-theme="dark">
+  <canvas id="ambient"></canvas>
+
+    <!-- ============ ONBOARDING ============ -->
+  <div id="onboarding" class="onboarding">
+    <div class="onboarding-card glass">
+      <div class="logo-badge"><span>✦</span></div>
+      <h1>Live Room</h1>
+      <p class="tagline">A conversation that grows. Room by room, message by message.</p>
+      <form id="join-form" autocomplete="off">
+        <label class="field">
+          <span>Your name</span>
+          <input id="join-name" type="text" maxlength="24" placeholder="e.g. Arij" required autofocus />
+        </label>
+        <label class="field">
+          <span>Room</span>
+          <input id="join-room" type="text" maxlength="40" placeholder="e.g. the-midnight-club" required />
+        </label>
+        <div class="room-suggestions">
+          <button type="button" data-room="the-midnight-club">🌙 midnight-club</button>
+          <button type="button" data-room="deep-talk-society">🧠 deep-talk</button>
+          <button type="button" data-room="meme-department">😂 memes</button>
+          <button type="button" data-room="quiet-corner">🌿 quiet</button>
+        </div>
+        <button class="btn btn-primary btn-block btn-enter" type="submit">Enter the room →</button>
+      </form>
+      <p class="hint">Tip: two people in the same room name will share the same space.</p>
+    </div>
+  </div>
+
+  <!-- ============ APP SHELL ============ -->
+  <div id="app" class="app hidden">
+    <header class="topbar glass">
+      <div class="brand">
+        <span class="brand-mark">✦</span>
+        <div class="brand-text">
+          <strong id="room-title">…</strong>
+          <span id="room-personality" class="sub">a quiet room</span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div id="conn" class="conn" title="Connection status">
+          <span id="conn-dot" class="dot"></span><span id="conn-label">Connecting…</span>
+        </div>
+        <span class="online-chip" title="Online now"><span class="dot dot-green"></span><b id="online-count">0</b> online</span>
+        <button id="btn-sidebar" class="icon-btn" title="Panel">▤</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <!-- ============ CHAT COLUMN ============ -->
+      <section class="chat-column">
+        <!-- Live event card: chaos OR challenge -->
+        <div id="event-card" class="event-card hidden"></div>
+
+        <div id="feed" class="feed" aria-live="polite">
+          <div class="feed-pad" id="feed-pad">
+            <div class="dayline">
+              <span class="dayline-text">🌱 The room is born. Say something.</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="typing-bar" class="typing-bar hidden">
+          <span class="typing-dots"><i></i><i></i><i></i></span>
+          <span id="typing-text"></span>
+        </div>
+
+        <!-- Composer -->
+        <div class="composer-row">
+          <div class="composer glass">
+            <textarea id="input" rows="1" maxlength="2000" placeholder="Write something… (Enter to send)"></textarea>
+            <div class="composer-actions">
+              <button id="btn-capsule" class="chip-btn" title="Seal a time capsule">🔒</button>
+              <button id="btn-poll" class="chip-btn" title="Start a poll">📊</button>
+              <button id="btn-chaos" class="btn chaos-btn" title="Unleash chaos">⚡ CHAOS</button>
+              <button id="btn-send" class="btn btn-primary send-btn" title="Send">➤</button>
+            </div>
+          </div>
+        </div>
+      </section>
+<!-- ============ SIDEBAR ============ -->
+      <aside id="sidebar" class="sidebar glass">
+        <div class="sidebar-head">
+          <span>Room Pulse</span>
+          <button id="btn-sidebar-close" class="icon-btn">✕</button>
+        </div>
+        <div class="sidebar-scroll">
+
+          <!-- Conversation Energy -->
+          <section class="widget" id="w-energy">
+            <h3 class="widget-title">Conversation Energy</h3>
+            <div class="energy-gauge">
+              <div id="energy-bar" class="energy-bar"></div>
+            </div>
+            <div class="energy-readout">
+              <span id="energy-score" class="energy-score">0%</span>
+              <span id="energy-label" class="energy-label">🌙 Calm</span>
+            </div>
+          </section>
+
+          <!-- Living world -->
+          <section class="widget" id="w-world">
+            <h3 class="widget-title">The Garden</h3>
+            <div id="world-art" class="world-art" aria-hidden="true">🌱</div>
+            <div class="world-row">
+              <span id="world-stage">🌱 Seed</span>
+              <span id="world-points" class="muted">0 pts</span>
+            </div>
+            <div class="world-stats">
+              <span title="branches">🌿 <b id="world-branches">0</b></span>
+              <span title="flowers">🌸 <b id="world-flowers">0</b></span>
+              <span title="glowing elements">✨ <b id="world-glows">0</b></span>
+            </div>
+          </section>
+
+          <!-- Room personality -->
+          <section class="widget" id="w-personality">
+            <h3 class="widget-title">Room Personality</h3>
+            <div class="trait"><span class="trait-emoji">😂</span><span class="trait-name">Humor</span><div class="trait-bar"><i id="trait-humor" class="trait-fill"></i></div><b id="trait-humor-v" class="trait-val">0%</b></div>
+            <div class="trait"><span class="trait-emoji">🔥</span><span class="trait-name">Chaos</span><div class="trait-bar"><i id="trait-chaos" class="trait-fill"></i></div><b id="trait-chaos-v" class="trait-val">0%</b></div>
+            <div class="trait"><span class="trait-emoji">🧠</span><span class="trait-name">Deep Talk</span><div class="trait-bar"><i id="trait-deep" class="trait-fill"></i></div><b id="trait-deep-v" class="trait-val">0%</b></div>
+            <div class="trait"><span class="trait-emoji">⚡</span><span class="trait-name">Activity</span><div class="trait-bar"><i id="trait-activity" class="trait-fill"></i></div><b id="trait-activity-v" class="trait-val">0%</b></div>
+          </section>
+
+          <!-- Presence -->
+          <section class="widget" id="w-presence">
+            <h3 class="widget-title">In the Room</h3>
+            <ul id="userlist" class="userlist"></ul>
+          </section>
+
+          <!-- Polls -->
+          <section class="widget" id="w-polls">
+            <h3 class="widget-title">Polls</h3>
+            <div id="polls" class="polls"><p class="muted empty">No polls yet. Start one with 📊.</p></div>
+          </section>
+
+          <!-- Capsules -->
+          <section class="widget" id="w-capsules">
+            <h3 class="widget-title">Time Capsules</h3>
+            <div id="capsules" class="capsules"><p class="muted empty">Sealed messages for later. 🔒</p></div>
+          </section>
+
+          <!-- Moments -->
+          <section class="widget" id="w-moments">
+            <h3 class="widget-title">Today's Moments</h3>
+            <div id="moments" class="moments"><p class="muted empty">Building history…</p></div>
+          </section>
+
+          <!-- Mystery -->
+          <section class="widget" id="w-mystery">
+            <h3 class="widget-title">🕵️ Mystery Room</h3>
+            <div id="mystery-panel" class="mystery-panel">
+              <p class="muted">Turn the room into a game of hidden roles.</p>
+              <button id="btn-mystery" class="btn btn-ghost btn-block">Activate round</button>
+            </div>
+          </section>
+        </div>
+      </aside>
+    </main>
+<!-- ============ MODALS ============ -->
+  <div id="modal-capsule" class="modal hidden">
+    <div class="modal-card glass">
+      <h3>🔒 Seal a Time Capsule</h3>
+      <p class="muted">A message that only becomes readable later.</p>
+      <label class="field"><span>Your note</span>
+        <textarea id="cap-text" rows="3" maxlength="500" placeholder='"Open this when we reach 1000 messages" / a note to the future'></textarea>
+      </label>
+      <div class="cap-opts">
+        <label class="seg"><input type="radio" name="cap-cond" value="date" checked /><span>Open at a time</span></label>
+        <label class="seg"><input type="radio" name="cap-cond" value="messages" /><span>Open after N messages</span></label>
+      </div>
+      <div id="cap-date-field" class="field"><span>Unlock time</span><input id="cap-date" type="datetime-local" /></div>
+      <div id="cap-msg-field" class="field hidden"><span>After how many messages?</span><input id="cap-count" type="number" min="3" max="10000" value="50" /></div>
+      <div class="modal-actions">
+        <button id="cap-cancel" class="btn btn-ghost">Cancel</button>
+        <button id="cap-save" class="btn btn-primary">Seal it 🔒</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-poll" class="modal hidden">
+    <div class="modal-card glass">
+      <h3>📊 Start a Poll</h3>
+      <label class="field"><span>Question</span><input id="poll-q" type="text" maxlength="120" placeholder="What should we do tonight?" /></label>
+      <div id="poll-opts">
+        <label class="field"><span>Option 1</span><input id="poll-o1" type="text" maxlength="40" placeholder="🍕 Pizza" /></label>
+        <label class="field"><span>Option 2</span><input id="poll-o2" type="text" maxlength="40" placeholder="🍔 Burger" /></label>
+        <label class="field"><span>Option 3 (optional)</span><input id="poll-o3" type="text" maxlength="40" placeholder="🍜 Chinese" /></label>
+        <label class="field"><span>Option 4 (optional)</span><input id="poll-o4" type="text" maxlength="40" placeholder="…" /></label>
+      </div>
+      <div class="modal-actions">
+        <button id="poll-cancel" class="btn btn-ghost">Cancel</button>
+        <button id="poll-save" class="btn btn-primary">Launch poll</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-vote" class="modal hidden">
+    <div class="modal-card glass">
+      <h3>🕵️ Cast your vote</h3>
+      <p class="muted">Who do you think is the impostor?</p>
+      <div id="vote-targets" class="vote-targets"></div>
+      <div class="modal-actions"><button id="vote-cancel" class="btn btn-ghost">Cancel</button></div>
+    </div>
+  </div>
+
+  <div id="mystery-reveal" class="mystery-reveal hidden">
+    <div class="mystery-reveal-card glass">
+      <h3 id="reveal-title">THE IMPOSTOR WAS…</h3>
+      <div id="reveal-body"></div>
+      <button id="reveal-close" class="btn btn-primary">Continue chatting</button>
+    </div>
+  </div>
+
+  <!-- toast layer -->
+  <div id="toasts" class="toasts"></div>
+
+  <!-- bottom sheet backdrop -->
+  <div id="sheet-backdrop" class="sheet-backdrop hidden"></div>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+// ---------------------------------------------------------------------------
+// Shared protocol types for the LIVE ROOM experience.
+// Every WebSocket frame is JSON: { type: string, payload: unknown }
+// ---------------------------------------------------------------------------
+export const EVT = {
+    // ---------------- client -> server ----------------
+    JOIN_ROOM: "JOIN_ROOM",
+    SEND_MESSAGE: "SEND_MESSAGE",
+    USER_TYPING: "USER_TYPING",
+    STOP_TYPING: "STOP_TYPING",
+    REACTION_TOGGLE: "REACTION_TOGGLE",
+    CHAOS_TRIGGER: "CHAOS_TRIGGER",
+    CHALLENGE_INTERACT: "CHALLENGE_INTERACT",
+    POLL_CREATE: "POLL_CREATE",
+    POLL_VOTE: "POLL_VOTE",
+    MYSTERY_ACTIVATE: "MYSTERY_ACTIVATE",
+    MYSTERY_VOTE: "MYSTERY_VOTE",
+    TIME_CAPSULE_CREATE: "TIME_CAPSULE_CREATE",
+    // ---------------- server -> client ----------------
+    WELCOME: "WELCOME",
+    ROOM_STATE: "ROOM_STATE",
+    MESSAGE: "MESSAGE",
+    USER_JOINED: "USER_JOINED",
+    USER_LEFT: "USER_LEFT",
+    PRESENCE_UPDATE: "PRESENCE_UPDATE",
+    TYPING_START: "TYPING_START",
+    TYPING_STOP: "TYPING_STOP",
+    REACTION_UPDATED: "REACTION_UPDATED",
+    ENERGY_UPDATE: "ENERGY_UPDATE",
+    ROOM_META_UPDATE: "ROOM_META_UPDATE",
+    CHAOS_STARTED: "CHAOS_STARTED",
+    CHAOS_ENDED: "CHAOS_ENDED",
+    CHALLENGE_STARTED: "CHALLENGE_STARTED",
+    CHALLENGE_COMPLETED: "CHALLENGE_COMPLETED",
+    CHALLENGE_ENDED: "CHALLENGE_ENDED",
+    XP_UPDATED: "XP_UPDATED",
+    POLL_CREATED: "POLL_CREATED",
+    POLL_UPDATED: "POLL_UPDATED",
+    TIME_CAPSULE_CREATED: "TIME_CAPSULE_CREATED",
+    TIME_CAPSULE_UNLOCKED: "TIME_CAPSULE_UNLOCKED",
+    MYSTERY_STARTED: "MYSTERY_STARTED",
+    MYSTERY_PHASE: "MYSTERY_PHASE",
+    MYSTERY_VOTE_CAST: "MYSTERY_VOTE_CAST",
+    MYSTERY_REVEAL: "MYSTERY_REVEAL",
+    MYSTERY_ROLE: "MYSTERY_ROLE",
+    ERROR: "ERROR",
+};
+//# sourceMappingURL=types.js.map
