@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsc -b && node ./dist/index.js"
+    "dev": "tsc -b && node ./dist/index.js",
+    "test": "node test/run-all.mjs",
+    "test:e2e": "node test/e2e-browser.mjs"
   },
   "keywords": [],
   "author": "",

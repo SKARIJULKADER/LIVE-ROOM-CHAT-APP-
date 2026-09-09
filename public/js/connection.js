@@ -12,6 +12,8 @@ export const socket = {
   timer: null,
   joinPayload: null, // { roomId, username, userId } used to rejoin after reconnect
   connectedAt: 0,
+  joined: false, // true once the server confirmed the join (ROOM_STATE)
+  outbox: [], // frames queued while the socket was down, flushed after join
 };
 
 export function on(type, fn) {
@@ -27,7 +29,12 @@ function setConn(stateName, label) {
 }
 
 export function connect(joinPayload) {
+  // keep frames queued for the SAME room (e.g. typed right before/while
+  // (re)connecting); only drop them when we are actually switching rooms
+  const roomChanged = socket.joinPayload != null && socket.joinPayload.roomId !== joinPayload?.roomId;
   socket.joinPayload = joinPayload;
+  socket.joined = false;
+  if (roomChanged) socket.outbox.length = 0;
   if (socket.ws) {
     try { socket.ws.close(); } catch { /* ignore */ }
     socket.ws = null;
@@ -60,6 +67,14 @@ function openSocket() {
         return;
       }
       if (!frame || typeof frame.type !== "string") return;
+      // join confirmed: flush anything queued while the socket was down
+      if (frame.type === "ROOM_STATE") {
+        socket.joined = true;
+        const queued = socket.outbox.splice(0);
+        for (const f of queued) {
+          try { ws.send(JSON.stringify(f)); } catch { /* ignore */ }
+        }
+      }
       const fn = socket.handlers.get(frame.type);
       if (fn) {
         try {
@@ -71,6 +86,7 @@ function openSocket() {
     };
 
     ws.onclose = () => {
+      socket.joined = false; // queue sends until we rejoin
       const wasOnline = state.connected;
       setConn("reconnecting", "Reconnecting…");
       if (wasOnline && socket.joinPayload) {
@@ -99,9 +115,12 @@ function scheduleReconnect() {
   }, delay);
 }
 
-/** send a frame; queue nothing (events are cheap to re-emit) */
+/** send a frame; queues while connecting/reconnecting so nothing is silently lost */
 export function send(type, payload = {}) {
   const ws = socket.ws;
-  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  if (!ws || ws.readyState !== WebSocket.OPEN || !socket.joined) {
+    if (socket.outbox.length < 100) socket.outbox.push({ type, payload });
+    return;
+  }
   ws.send(JSON.stringify({ type, payload }));
 }
